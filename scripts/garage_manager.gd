@@ -5,13 +5,14 @@ class_name GarageManager
 signal car_docked(car: CarData, lift_index: int)
 signal car_repaired(car: CarData, lift_index: int)
 
-@export var max_lifts: int = 2
+@export var max_lifts: int = 1
 var lifts: Array = [] # cada slot: null o CarData
 var game: GameManager
 
 func _ready() -> void:
-	lifts.resize(max_lifts)
-	lifts.fill(null)
+	if lifts.is_empty():
+		lifts.resize(maxi(1, max_lifts))
+		lifts.fill(null)
 	game = get_node_or_null("/root/Game") as GameManager
 
 func free_lift() -> int:
@@ -39,3 +40,16 @@ func release_car(lift_index: int) -> CarData:
 
 func is_full() -> bool:
 	return free_lift() == -1
+
+func set_max_lifts(n: int) -> void:
+	n = clampi(n, 1, 4)
+	max_lifts = n
+	while lifts.size() < n:
+		lifts.append(null)
+
+func docked_count() -> int:
+	var c := 0
+	for x in lifts:
+		if x != null:
+			c += 1
+	return c
