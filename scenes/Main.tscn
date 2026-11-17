@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://cgaragebarrio01"]
+[gd_scene load_steps=14 format=3 uid="uid://cgaragebarrio02"]
 
 [ext_resource type="Script" path="res://scripts/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://scripts/game_manager.gd" id="2_game"]
@@ -8,15 +8,20 @@
 [ext_resource type="Script" path="res://scripts/client_panel.gd" id="6_client"]
 [ext_resource type="Script" path="res://scripts/repair_panel.gd" id="7_repair"]
 [ext_resource type="Script" path="res://scripts/repair_minigame.gd" id="8_mini"]
+[ext_resource type="Script" path="res://scripts/shop_panel.gd" id="9_shop"]
+[ext_resource type="Script" path="res://scripts/sound_manager.gd" id="10_sound"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_floor"]
-size = Vector3(10, 0.1, 8)
+size = Vector3(14, 0.1, 10)
 
 [sub_resource type="BoxMesh" id="BoxMesh_car"]
 size = Vector3(1.8, 0.7, 3.6)
 
 [sub_resource type="BoxMesh" id="BoxMesh_lift"]
-size = Vector3(2.4, 0.2, 4.2)
+size = Vector3(2.6, 0.2, 4.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_wall"]
+size = Vector3(14, 3, 0.3)
 
 [sub_resource type="Environment" id="Env_1"]
 background_mode = 1
@@ -36,7 +41,7 @@ transform = Transform3D(1, 0, 0, 0, 0.866025, 0.5, 0, -0.5, 0.866025, 0, 6, 2)
 shadow_enabled = true
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.9, 0.435891, 0, -0.435891, 0.9, 0, 4.5, 7.5)
+transform = Transform3D(1, 0, 0, 0, 0.88, 0.47, 0, -0.47, 0.88, 0, 6.5, 10.5)
 
 [node name="Game" type="Node" parent="."]
 script = ExtResource("2_game")
@@ -44,19 +49,48 @@ script = ExtResource("2_game")
 [node name="Clients" type="Node" parent="."]
 script = ExtResource("4_clients")
 
+[node name="Sound" type="Node" parent="."]
+script = ExtResource("10_sound")
+
 [node name="Garage" type="Node3D" parent="."]
 script = ExtResource("3_garage")
 
 [node name="Floor" type="MeshInstance3D" parent="Garage"]
 mesh = SubResource("BoxMesh_floor")
 
-[node name="Lift" type="MeshInstance3D" parent="Garage"]
+[node name="BackWall" type="MeshInstance3D" parent="Garage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, -5)
+mesh = SubResource("BoxMesh_wall")
+
+[node name="Lift1" type="MeshInstance3D" parent="Garage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.05, 0)
+mesh = SubResource("BoxMesh_lift")
+
+[node name="Lift2" type="MeshInstance3D" parent="Garage"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
 mesh = SubResource("BoxMesh_lift")
 
-[node name="CarBody" type="MeshInstance3D" parent="Garage"]
+[node name="Lift3" type="MeshInstance3D" parent="Garage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.05, 0)
+mesh = SubResource("BoxMesh_lift")
+
+[node name="CarBody1" type="MeshInstance3D" parent="Garage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4, 0.7, 0)
+mesh = SubResource("BoxMesh_car")
+
+[node name="CarBody2" type="MeshInstance3D" parent="Garage"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
 mesh = SubResource("BoxMesh_car")
+
+[node name="CarBody3" type="MeshInstance3D" parent="Garage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0.7, 0)
+mesh = SubResource("BoxMesh_car")
+
+[node name="DecoLight" type="OmniLight3D" parent="Garage"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+light_color = Color(0.7, 0.75, 1, 1)
+light_energy = 0.6
+omni_range = 12.0
 
 [node name="UI" type="CanvasLayer" parent="."]
 
@@ -82,7 +116,7 @@ text = "Día 1"
 [node name="RepLabel" type="Label" parent="UI/HUD/TopBar"]
 text = "⭐ 10"
 
-[node name="NextClientButton" type="Button" parent="UI"]
+[node name="BottomBar" type="HBoxContainer" parent="UI"]
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -90,7 +124,17 @@ offset_left = 16.0
 offset_top = -96.0
 offset_right = -16.0
 offset_bottom = -24.0
+theme_override_constants/separation = 12
+
+[node name="NextClientButton" type="Button" parent="UI/BottomBar"]
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 64)
 text = "🔔 Llamar cliente"
+
+[node name="ShopButton" type="Button" parent="UI/BottomBar"]
+size_flags_horizontal = 2
+custom_minimum_size = Vector2(0, 64)
+text = "🏪 Tienda"
 
 [node name="ClientPanel" type="Control" parent="UI"]
 visible = false
@@ -199,7 +243,6 @@ custom_minimum_size = Vector2(0, 64)
 color = Color(0.2, 0.2, 0.25, 1)
 
 [node name="Zone" type="ColorRect" parent="UI/Minigame/Panel/VBox/Bar"]
-anchor_top = 0.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 color = Color(0.2, 0.8, 0.3, 1)
@@ -207,3 +250,41 @@ color = Color(0.2, 0.8, 0.3, 1)
 [node name="Needle" type="ColorRect" parent="UI/Minigame/Panel/VBox/Bar"]
 custom_minimum_size = Vector2(8, 64)
 color = Color(1, 1, 1, 1)
+
+[node name="ShopPanel" type="Control" parent="UI"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -250.0
+offset_right = 300.0
+offset_bottom = 250.0
+script = ExtResource("9_shop")
+
+[node name="Panel" type="PanelContainer" parent="UI/ShopPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Margin" type="MarginContainer" parent="UI/ShopPanel/Panel"]
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="UI/ShopPanel/Panel/Margin"]
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="UI/ShopPanel/Panel/Margin/VBox"]
+text = "Tienda"
+
+[node name="MoneyLabel" type="Label" parent="UI/ShopPanel/Panel/Margin/VBox"]
+text = "Plata"
+
+[node name="ShopList" type="VBoxContainer" parent="UI/ShopPanel/Panel/Margin/VBox"]
+theme_override_constants/separation = 8
+
+[node name="CloseButton" type="Button" parent="UI/ShopPanel/Panel/Margin/VBox"]
+custom_minimum_size = Vector2(0, 56)
+text = "Cerrar"
