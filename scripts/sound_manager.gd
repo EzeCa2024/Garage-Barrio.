@@ -24,8 +24,8 @@ func _tone(freq: float, duration: float, volume_db: float = -8.0, slide_to: floa
 		var s := sin(TAU * f * t) * 0.6 * (1.0 - float(i) / frames)
 		var v := int(clampf(s, -1.0, 1.0) * 32767)
 		data.encode_s16(i * 2, v)
-	var stream := AudioStreamWav.new()
-	stream.format = AudioStreamWav.FORMAT_16_BITS
+	var stream := AudioStreamWAV.new()
+	stream.format = AudioStreamWAV.FORMAT_16_BITS
 	stream.mix_rate = sample_rate
 	stream.data = data
 	var p: AudioStreamPlayer = _free_player()
