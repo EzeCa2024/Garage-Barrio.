@@ -10,6 +10,9 @@ var money: int = 500
 var reputation: int = 10 # 0-100
 var day: int = 1
 var completed_cars: int = 0
+var upgrades: Dictionary = {} # id -> true
+
+signal upgrade_unlocked(upgrade_id: String)
 
 const SAVE_PATH := "user://savegame.json"
 
@@ -39,10 +42,48 @@ func next_day() -> void:
 	save_game()
 
 func complete_car(payout: int, rep_gain: int) -> void:
-	add_money(payout)
-	add_reputation(rep_gain)
+	# aplica bonus de tienda
+	var bonus_pay := payout_bonus_mult()
+	var bonus_rep := reputation_bonus_extra()
+	add_money(int(round(payout * bonus_pay)))
+	add_reputation(rep_gain + bonus_rep)
 	completed_cars += 1
 	save_game()
+
+func unlock_upgrade(id: String) -> void:
+	upgrades[id] = true
+	upgrade_unlocked.emit(id)
+	save_game()
+
+func has_upgrade(id: String) -> bool:
+	return bool(upgrades.get(id, false))
+
+func payout_bonus_mult() -> float:
+	var m := 1.0
+	if has_upgrade("tools1"): m += 0.05
+	if has_upgrade("tools2"): m += 0.10
+	if has_upgrade("publi1"): m += 0.10
+	if has_upgrade("publi2"): m += 0.20
+	return m
+
+func reputation_bonus_extra() -> int:
+	var r := 0
+	if has_upgrade("publi1"): r += 1
+	if has_upgrade("publi2"): r += 2
+	if has_upgrade("deco1"): r += 2
+	return r
+
+func difficulty_mult() -> float:
+	var m := 1.0
+	if has_upgrade("tools1"): m *= 0.85
+	if has_upgrade("tools2"): m *= 0.75
+	return m
+
+func max_lifts_allowed() -> int:
+	var n := 1
+	if has_upgrade("lift2"): n += 1
+	if has_upgrade("lift3"): n += 1
+	return n
 
 func save_game() -> void:
 	var data := {
@@ -50,6 +91,7 @@ func save_game() -> void:
 		"reputation": reputation,
 		"day": day,
 		"completed_cars": completed_cars,
+		"upgrades": upgrades,
 	}
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:
@@ -68,3 +110,6 @@ func load_game() -> void:
 	reputation = int(parsed.get("reputation", reputation))
 	day = int(parsed.get("day", day))
 	completed_cars = int(parsed.get("completed_cars", 0))
+	var u = parsed.get("upgrades", {})
+	if typeof(u) == TYPE_DICTIONARY:
+		upgrades = u
